@@ -1,12 +1,30 @@
 import type { Branch, Brand, Category } from "@/lib/types";
 import { IMG } from "./images";
 
+/**
+ * URL pública del sitio. Acepta valores con o sin protocolo ("midominio.com" o "https://midominio.com").
+ * Si no hay variable configurada, usa el dominio de producción que Vercel inyecta automáticamente.
+ */
+function resolveSiteUrl() {
+  const raw =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+    process.env.VERCEL_URL ||
+    "manhattan-cdg.vercel.app";
+  const withProtocol = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  try {
+    return new URL(withProtocol).origin;
+  } catch {
+    return "https://manhattan-cdg.vercel.app";
+  }
+}
+
 export const SITE = {
   name: "Manhattan",
   tagline: "Vestir bien nunca pasa de moda.",
   description:
     "Manhattan — boutique de moda femenina en Cañada de Gómez. Vestidos, sastrería, denim, tejidos y accesorios de Liarte, Ossira, Vesna y Drop Denim. Envíos a todo el país.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://manhattan-cdg.vercel.app",
+  url: resolveSiteUrl(),
   instagram: "https://www.instagram.com/manhattan.cdg/",
   instagramHandle: "@manhattan.cdg",
   whatsapp: "543471516409",
