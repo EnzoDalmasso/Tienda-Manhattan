@@ -4,6 +4,15 @@ out
 .vercel
 *.tsbuildinfo
 next-env.d.ts
-.env*.local
 .DS_Store
 .claude
+
+# variables de entorno: nunca se suben, solo el ejemplo
+.env
+.env.*
+!.env.example
+
+# certificados y claves
+*.pem
+*.key
+*.pfx

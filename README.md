@@ -1,77 +1,49 @@
-# Manhattan — Tienda online (demo)
+# Tienda Manhattan
 
-E-commerce demo de **Manhattan**, boutique de moda femenina en Cañada de Gómez (Santa Fe).
-*"Vestir bien nunca pasa de moda."*
+Tienda online para Manhattan, un local de ropa de mujer de Cañada de Gómez (Santa Fe) que hoy vende por Instagram y WhatsApp. La armé como demo para mostrarles cómo podría verse su tienda propia, así que los productos, precios y fotos son de prueba.
 
-## Stack
+## Con qué está hecha
 
-- **Next.js 15** (App Router, SSG) + **React 19** + **TypeScript**
-- **Tailwind CSS v4** + componentes estilo **shadcn/ui** (Radix)
-- **Framer Motion** para animaciones · **Lucide** para íconos
-- **Zustand** (carrito, favoritos y sucursal persistidos en `localStorage`)
-- `next/image` (AVIF/WebP), `next/font`, metadata SEO, JSON-LD, `sitemap.xml` y `robots.txt`
+Next.js 15 con App Router, TypeScript y Tailwind 4. Los componentes base siguen el estilo de shadcn/ui (sobre Radix), las animaciones son con Framer Motion y el carrito, los favoritos y la sucursal elegida viven en Zustand, guardados en localStorage. No hay backend todavía: todas las páginas se generan estáticas en el build.
 
-## Correr localmente
+## Qué se puede hacer
+
+Recorrer el catálogo filtrando por categoría, talle, color, precio o marca (los filtros quedan en la URL, así que un link filtrado se puede compartir), entrar a un producto y ver el stock en cada una de las dos sucursales, armar el carrito y pasar por un checkout de tres pasos donde se elige retiro en local o envío y el medio de pago. El pago es simulado; al final muestra el número de pedido y no cobra nada.
+
+También tiene página de sucursales con mapa y horarios, favoritos y un botón de WhatsApp que arma el mensaje con el producto que estás mirando.
+
+## Correrla local
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000
-npm run build      # build de producción
-npm run typecheck
+npm run dev
 ```
 
-## Deploy en Vercel
+Queda en http://localhost:3000. Para chequear el build de producción: `npm run build`.
 
-1. Subir el repo a GitHub.
-2. En Vercel → *Add New Project* → importar el repo (se detecta Next.js automáticamente).
-3. Variable de entorno: `NEXT_PUBLIC_SITE_URL` = URL final (para SEO y sitemap).
+No hace falta ninguna variable de entorno. `NEXT_PUBLIC_SITE_URL` es opcional y solo se usa para el sitemap y las metaetiquetas; si no está, en Vercel toma el dominio del proyecto.
 
-No requiere base de datos ni claves para la demo.
+## Cómo está organizada
 
-## Páginas
-
-| Ruta | Contenido |
-|---|---|
-| `/` | Hero, marcas, beneficios, categorías, destacados / más vendidos / ofertas, nuevos ingresos, sale con cuenta regresiva, lookbook, opiniones, sucursales, Instagram, newsletter |
-| `/catalogo` | Grilla con filtros (categoría, precio, talle, color, marca, oferta), búsqueda y orden. Filtros sincronizados en la URL (links compartibles) |
-| `/producto/[slug]` | Galería con zoom y lightbox, variantes de color/talle, guía de talles, **stock por sucursal**, WhatsApp, relacionados |
-| `/carrito` | Edición de cantidades, cupón, resumen |
-| `/checkout` | 3 pasos: datos → entrega (retiro en sucursal / envío) → pago (Mercado Pago, tarjeta, transferencia -10%, efectivo) |
-| `/sucursales` | Dirección, horarios, mapa embebido y WhatsApp de cada local |
-| `/favoritos` | Wishlist |
-
-## Estructura
+Los componentes no leen los datos directo de los archivos: pasan por `src/lib/services/`, que hoy devuelve datos fijos de `src/lib/data/`. La idea es que el día que haya base de datos se cambie el contenido de esas funciones y el resto quede igual.
 
 ```
 src/
-  app/                  rutas (App Router)
-  components/
-    ui/                 primitivas estilo shadcn (button, sheet, dialog, accordion…)
-    layout/             header, footer, drawer de carrito, búsqueda, WhatsApp
-    home/ catalog/ product/ checkout/ shared/
-  lib/
-    types.ts            modelos de dominio (Product, Branch, CartItem…)
-    data/               datos demo (productos, sucursales, imágenes)
-    services/           capa de acceso a datos (catalog.ts, orders.ts)
-  store/                estado cliente (zustand)
+  app/          páginas
+  components/   ui/ (base), layout/, home/, catalog/, product/, checkout/
+  lib/          tipos, datos de prueba y servicios
+  store/        estado del carrito, favoritos y sucursal
 ```
 
-## Antes de publicar (datos a reemplazar)
+## Seguridad
 
-- **Direcciones y horarios de las sucursales** en `src/lib/data/store.ts` → son de ejemplo.
-- **WhatsApp**: se usa el de la bio de Instagram (`543471516409`) para ambos locales.
-- **Fotos**: son de Unsplash (placeholder). Reemplazar por fotos propias en `src/lib/data/images.ts`.
-- **Productos y precios**: ficticios, en `src/lib/data/products.ts`.
+El repo no tiene claves ni credenciales y el `.gitignore` deja afuera cualquier `.env`. En producción el sitio manda cabeceras de seguridad (CSP, HSTS, X-Frame-Options, nosniff) configuradas en `next.config.ts`. Como todavía no hay base de datos ni pagos reales, el checkout no envía datos a ningún servidor.
 
-## Hoja de ruta hacia producción
+Cuando se sumen integraciones, las claves privadas (Mercado Pago, la service role de Supabase) van como variables de entorno en Vercel y se usan solo desde el servidor, nunca con el prefijo `NEXT_PUBLIC_`.
 
-La UI no lee datos directamente: todo pasa por `src/lib/services/*`, con funciones `async`.
-Para conectar un backend real sólo se reemplaza el cuerpo de esas funciones.
+## Pendiente
 
-1. **Supabase**: tablas `products`, `product_variants`, `branches`, `stock (variant_id, branch_id, qty)`,
-   `orders`, `order_items`, `subscribers`. Imágenes en Supabase Storage.
-2. **Pagos**: `createOrder` (`lib/services/orders.ts`) → pasar a Server Action que valide precios/stock
-   en servidor y cree la preferencia de **Mercado Pago** (o PaymentIntent de **Stripe**). Webhook para confirmar pago.
-3. **Stock**: descontar/reservar por sucursal al confirmar la orden.
-4. **Panel de administración**: `/admin` protegido con Supabase Auth (ABM de productos, stock por sucursal, pedidos).
-5. **Newsletter**: conectar el formulario a la tabla `subscribers` o a un proveedor de email marketing.
+- Pasar productos, stock por sucursal y pedidos a Supabase.
+- Cobro real con Mercado Pago, validando precio y stock en el servidor antes de crear el pago.
+- Un panel para que el local cargue productos y actualice stock sin tocar código.
+- Cargar las direcciones y horarios reales de los locales (los de la demo son inventados) y las fotos propias de la marca.
