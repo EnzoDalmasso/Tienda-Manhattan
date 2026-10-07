@@ -21,7 +21,7 @@ npm run dev
 
 Queda en http://localhost:3000. Para chequear el build de producción: `npm run build`.
 
-No hace falta ninguna variable de entorno. `NEXT_PUBLIC_SITE_URL` es opcional y solo se usa para el sitemap y las metaetiquetas; si no está, en Vercel toma el dominio del proyecto.
+No hace falta ninguna variable de entorno. `NEXT_PUBLIC_SITE_URL` es opcional y solo se usa para el sitemap y las metaetiquetas.
 
 ## Cómo está organizada
 
@@ -39,7 +39,7 @@ src/
 
 El repo no tiene claves ni credenciales y el `.gitignore` deja afuera cualquier `.env`. En producción el sitio manda cabeceras de seguridad (CSP, HSTS, X-Frame-Options, nosniff) configuradas en `next.config.ts`. Como todavía no hay base de datos ni pagos reales, el checkout no envía datos a ningún servidor.
 
-Cuando se sumen integraciones, las claves privadas (Mercado Pago, la service role de Supabase) van como variables de entorno en Vercel y se usan solo desde el servidor, nunca con el prefijo `NEXT_PUBLIC_`.
+Cuando se sumen integraciones, las claves privadas (Mercado Pago, la service role de Supabase) van como variables de entorno y se leen solo del lado del servidor, nunca con el prefijo `NEXT_PUBLIC_`.
 
 ## Pendiente
 

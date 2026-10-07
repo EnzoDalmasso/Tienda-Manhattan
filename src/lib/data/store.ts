@@ -3,19 +3,18 @@ import { IMG } from "./images";
 
 /**
  * URL pública del sitio. Acepta valores con o sin protocolo ("midominio.com" o "https://midominio.com").
- * Si no hay variable configurada, usa el dominio de producción que Vercel inyecta automáticamente.
+ * Sin variable configurada, usa la URL local de desarrollo.
  */
+const DEFAULT_SITE_URL = "http://localhost:3000";
+
 function resolveSiteUrl() {
-  const raw =
-    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-    process.env.VERCEL_PROJECT_PRODUCTION_URL ||
-    process.env.VERCEL_URL ||
-    "manhattan-cdg.vercel.app";
+  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (!raw) return DEFAULT_SITE_URL;
   const withProtocol = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
   try {
     return new URL(withProtocol).origin;
   } catch {
-    return "https://manhattan-cdg.vercel.app";
+    return DEFAULT_SITE_URL;
   }
 }
 
